@@ -1,6 +1,8 @@
 result
-predicts
+predicts_respaldo
 predictionYolo
 *.pt
 calibration
 pruebaLecturatxt.py
+*.jpg
+*.avi
