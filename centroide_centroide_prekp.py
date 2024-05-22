@@ -9,8 +9,10 @@ list_colors = [(255,0,255), (0, 255, 255), (255, 0, 0), (0, 0, 0), (255, 255, 0)
 # Parametos intrinsecos de la camara
 baseline = 58
 f_px = 3098.3472392388794
-center = (777.6339950561523,
-            539.533634185791)
+# f_px = (1430.012149825778 + 1430.9237520924735 + 1434.1823778243315 + 1435.2411841383973) / 4 
+# center = ((929.8117736131715 + 936.7865692255547) / 2,
+#            (506.4104424162777 + 520.0461674300153) / 2)
+center = (777.6339950561523,539.533634185791)
 
 
 
@@ -58,11 +60,34 @@ def live_plot_3d(left_kpts, right_kpts, baseline, f_px, center):
     show_each_point_of_person(left_kpts, right_kpts, baseline, f_px, center, list_color_to_paint, ax, plot_3d, body_3d, list_points_persons)
     show_centroid_and_normal(list_points_persons, list_color_to_paint, ax, list_centroides, plot_3d)
 
-    # Ilustrar el centroide de los centroides
+
+
+    # Crear una imagen negra de 1080x1920 con tres canales
+    image_back = np.zeros((1080, 1920, 3), dtype=np.uint8)
+
+    # unir los puntos con una línea
+    for i in range(len(list_centroides)):
+        if i == len(list_centroides) - 1:
+            break
+        pt1 = (list_centroides[i][0], list_centroides[i][2])
+        pt2 = list_centroides[i+1][0], list_centroides[i+1][2]# pts[(i+1)%len(pts)]
+        cv2.line(image_back, pt1, pt2, (255, 255, 255), 1)
+
+    # Convertir la imagen a escala de grises
+    gray_image = cv2.cvtColor(image_back, cv2.COLOR_BGR2GRAY)
+    # Mostrar las imágenes
+    # cv2.imshow("Color Image", image)
+    cv2.imshow("Grayscale Image", gray_image)
+    cv2.waitKey(0)
+
+
+
+
+    # Ilustrar el centroide de los centroides (centroide del grupo)
     centroide = calcular_centroide(list_centroides)
     plot_3d(centroide[0], centroide[1], centroide[2], ax, "black", s=800, marker='o', label="Cg")
 
-    # 210 - 213 - 242 - 269(0 right) ----------------- 
+    # Conectar cada uno de los puntos del tronco
     show_connection_points(list_centroides, ax)
     
     plt.draw()
@@ -133,25 +158,23 @@ def graph_circles(array_pts, w, h, frame):
 
 
 # YOLO -----------------------------------------------------------------------------------------------------------------
-# capL=cv2.VideoCapture('./predictionYolo/predict39/16_35_42_26_02_2024_VID_LEFT.avi')
-# capR=cv2.VideoCapture('./predictionYolo/predict40/16_35_42_26_02_2024_VID_RIGHT.avi')
-# capL=cv2.VideoCapture('./predicts/YOLO/16_35_42_26_02_2024_VID_LEFT.avi')
-# capR=cv2.VideoCapture('./predicts/YOLO/16_35_42_26_02_2024_VID_RIGHT.avi')
-# capL=cv2.VideoCapture('./predicts/YOLO/newcalibration/15_58_03_05_04_2024_VIDEO_LEFT.avi')
-# path_file_left = './predicts/YOLO/newcalibration/15_58_03_05_04_2024_VIDEO_LEFT/15_58_03_05_04_2024_VIDEO_LEFT_'
-# capR=cv2.VideoCapture('./predicts/YOLO/newcalibration/15_58_03_05_04_2024_VIDEO_RIGHT.avi')
-# path_file_right = './predicts/YOLO/newcalibration/15_58_03_05_04_2024_VIDEO_RIGHT/15_58_03_05_04_2024_VIDEO_RIGHT_'
+capL=cv2.VideoCapture('./predicts/YOLO/newcalibration/15_58_03_05_04_2024_VIDEO_LEFT.avi')
+path_file_left = './predicts/YOLO/newcalibration/15_58_03_05_04_2024_VIDEO_LEFT/15_58_03_05_04_2024_VIDEO_LEFT_'
+capR=cv2.VideoCapture('./predicts/YOLO/newcalibration/15_58_03_05_04_2024_VIDEO_RIGHT.avi')
+path_file_right = './predicts/YOLO/newcalibration/15_58_03_05_04_2024_VIDEO_RIGHT/15_58_03_05_04_2024_VIDEO_RIGHT_'
 
-# capL=cv2.VideoCapture('./predicts/YOLO/newcalibration/Cortado/L_left_calibrated.avi')
-# path_file_left = './predicts/YOLO/newcalibration/Cortado/L_left_calibrated/L_left_calibrated_'
-# capR=cv2.VideoCapture('./predicts/YOLO/newcalibration/Cortado/L_right_calibrated.avi')
-# path_file_right = './predicts/YOLO/newcalibration/Cortado/L_right_calibrated/L_right_calibrated_'
+
+# capL=cv2.VideoCapture('./predicts/YOLO/integradora/16_35_42_26_02_2024_VID_LEFT.avi')
+# path_file_left = './predicts/YOLO/integradora/16_35_42_26_02_2024_VID_LEFT/16_35_42_26_02_2024_VID_LEFT_'
+# capR=cv2.VideoCapture('./predicts/YOLO/integradora/16_35_42_26_02_2024_VID_RIGHT.avi')
+# path_file_right = './predicts/YOLO/integradora/16_35_42_26_02_2024_VID_RIGHT/16_35_42_26_02_2024_VID_RIGHT_'
+
 
 # OpenPose -------------------------------------------------------------------------------------------------------------
-capL=cv2.VideoCapture('./predicts/OP/newcalibration/15_58_03_05_04_2024_VIDEO_LEFT.avi')
-path_file_left = './predicts/OP/newcalibration/15_58_03_05_04_2024_VIDEO_LEFT/frame_'
-capR=cv2.VideoCapture('./predicts/OP/newcalibration/15_58_03_05_04_2024_VIDEO_RIGHT.avi')
-path_file_right = './predicts/OP/newcalibration/15_58_03_05_04_2024_VIDEO_RIGHT/frame_'
+# capL=cv2.VideoCapture('./predicts/OP/newcalibration/15_58_03_05_04_2024_VIDEO_LEFT.avi')
+# path_file_left = './predicts/OP/newcalibration/15_58_03_05_04_2024_VIDEO_LEFT/frame_'
+# capR=cv2.VideoCapture('./predicts/OP/newcalibration/15_58_03_05_04_2024_VIDEO_RIGHT.avi')
+# path_file_right = './predicts/OP/newcalibration/15_58_03_05_04_2024_VIDEO_RIGHT/frame_'
 
 """
 # LightGlue ------------------------------------------------------------------------------------------------------------
@@ -202,12 +225,13 @@ while(capR.isOpened() and capL.isOpened()):
     # print(keypointsL[:, [5, 6, 11, 12], :])
     # print(keypointsR_sorted[:, [5, 6, 11, 12], :])
 
-    # keypointsL_filtered = keypointsL[:, [5, 6, 11, 12], :]
-    # keypointsR_filtered = keypointsR_sorted[:, [5, 6, 11, 12], :]
+    # YOLO
+    keypointsL_filtered = keypointsL[:, [0, 3, 4, 5, 6, 11, 12], :]
+    keypointsR_filtered = keypointsR_sorted[:, [0, 3, 4, 5, 6, 11, 12], :]
 
-
-    keypointsL_filtered = keypointsL[:, [0, 2, 5, 9, 12], :]
-    keypointsR_filtered = keypointsR_sorted[:, [0, 2, 5, 9, 12], :]
+    # OpenPose
+    # keypointsL_filtered = keypointsL[:, [0, 2, 5, 9, 12], :]
+    # keypointsR_filtered = keypointsR_sorted[:, [0, 2, 5, 9, 12], :]
     lists_points_3d = point_cloud(keypointsL_filtered, keypointsR_filtered, baseline, f_px, center)
     frame_num += 1
     print("Frame", frame_num)
