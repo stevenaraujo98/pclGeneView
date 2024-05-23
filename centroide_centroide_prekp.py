@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from getKeypointsFile import getKeypoints
 from space_3d import show_centroid_and_normal, calcular_centroide, show_each_point_of_person, show_connection_points
+from character_meet import get_img_shape_meet
 
 lista_colores = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
 list_colors = [(255,0,255), (0, 255, 255), (255, 0, 0), (0, 0, 0), (255, 255, 0), (205, 92, 92), (255, 0, 255), (0, 128, 128), (128, 0, 0), (128, 128, 0), (128, 128, 128)]
@@ -59,28 +60,7 @@ def live_plot_3d(left_kpts, right_kpts, baseline, f_px, center):
 
     show_each_point_of_person(left_kpts, right_kpts, baseline, f_px, center, list_color_to_paint, ax, plot_3d, body_3d, list_points_persons)
     show_centroid_and_normal(list_points_persons, list_color_to_paint, ax, list_centroides, plot_3d)
-
-
-
-    # Crear una imagen negra de 1080x1920 con tres canales
-    image_back = np.zeros((1080, 1920, 3), dtype=np.uint8)
-
-    # unir los puntos con una línea
-    for i in range(len(list_centroides)):
-        if i == len(list_centroides) - 1:
-            break
-        pt1 = (list_centroides[i][0], list_centroides[i][2])
-        pt2 = list_centroides[i+1][0], list_centroides[i+1][2]# pts[(i+1)%len(pts)]
-        cv2.line(image_back, pt1, pt2, (255, 255, 255), 1)
-
-    # Convertir la imagen a escala de grises
-    gray_image = cv2.cvtColor(image_back, cv2.COLOR_BGR2GRAY)
-    # Mostrar las imágenes
-    # cv2.imshow("Color Image", image)
-    cv2.imshow("Grayscale Image", gray_image)
-    cv2.waitKey(0)
-
-
+    get_img_shape_meet(list_centroides)
 
 
     # Ilustrar el centroide de los centroides (centroide del grupo)
