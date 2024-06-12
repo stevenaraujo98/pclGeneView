@@ -1,6 +1,7 @@
 import numpy as np
 # from dijkstra import Graph
 import networkx as nx
+from  character_meet import get_img_shape_meet_prev_sort
 
 def calcular_centroide(lista_de_listas):
     # Inicializa las sumas de las coordenadas x, y, z
@@ -42,7 +43,26 @@ def get_points_filtered(points):
             list_res.append([])
     return list_res
 
-def show_each_point_of_person(left_kpts, right_kpts, baseline, f_px, center, list_color_to_paint, ax, plot_3d, body_3d, list_points_persons):
+def find_depth_from_disparities(right_points, left_points, baseline, f_pixel):
+    x_right = np.array(right_points)
+    x_left = np.array(left_points)
+    disparity = np.abs(x_left - x_right)
+    z_depth = (baseline * f_pixel) / disparity
+    return np.mean(z_depth)
+
+def body_3d(kp_left, kp_right, baseline, f_px, center_left):
+    assert len(kp_left) == len(kp_right)
+
+    # Calcular la profundidad de cada punto
+    z = [find_depth_from_disparities(
+        [x1[0]], [x2[0]], baseline, f_px) for x1, x2 in zip(kp_left, kp_right)]
+
+    x = (kp_left[:, 0] - center_left[0]) * z / f_px
+    y = (kp_left[:, 1] - center_left[1]) * z / f_px
+
+    return x, y, z
+
+def show_each_point_of_person(left_kpts, right_kpts, baseline, f_px, center, list_color_to_paint, ax, plot_3d, list_points_persons):
     # Ilustrar cada punto en 3D
     for left_k, right_k, color in zip(left_kpts, right_kpts, list_color_to_paint):
         points = body_3d(left_k, right_k, baseline, f_px, center)
@@ -149,13 +169,14 @@ def show_centroid_and_normal(list_points_persons, list_color_to_paint, ax, list_
         # Calcular centroide del tronco
         centroide = calcular_centroide(body_points)
 
-        # Calcular el vector normal al plano del tronco e ilustrarlo
-        get_vector_normal_to_plane(body_points, centroide, ax, color)
-
         # Grafica del centroide de la persona
         plot_3d(centroide[0], centroide[1], centroide[2], ax, color, s=400, marker='o', label="C"+str(index))
 
+        # Calcular el vector normal al plano del tronco e ilustrarlo
+        # get_vector_normal_to_plane(body_points, centroide, ax, color)
+
         if len(head_points[0]) > 0:
+            # Calcular la media de las coordenadas y de los puntos de las orejas
             if len(head_points[1]) > 0 and len(head_points[2]) > 0:
                 mean_y = (head_points[1][1] + head_points[2][1]) / 2
             elif len(head_points[1]) > 0:
@@ -166,10 +187,10 @@ def show_centroid_and_normal(list_points_persons, list_color_to_paint, ax, list_
                 mean_y = head_points[0][1]
 
             # Centroide a la nariz
-            plot_3d(centroide[0], mean_y, centroide[2], ax, color, s=100, marker='o', label="C"+str(index))
+            # plot_3d(centroide[0], mean_y, centroide[2], ax, color, s=100, marker='o', label="C"+str(index))
             
             # unir con una linea 2 los dos centroides
-            ax.plot([centroide[0], head_points[0][0]], [mean_y, head_points[0][1]], [centroide[2], head_points[0][2]], color)
+            # ax.plot([centroide[0], head_points[0][0]], [mean_y, head_points[0][1]], [centroide[2], head_points[0][2]], color)
         else:
             print("---- No se encuentra la nariz")
         
@@ -226,8 +247,18 @@ def show_connection_points(list_centroides, ax):
         sorted_dict = dict(sorted(tmp_res.items(), key=lambda item: item[1]))
         res_sorted.append(list(sorted_dict.items())[0][0])
 
-    # Unir los centroides con líneas
-    for i, j in res_sorted:
-        ax.plot([list_centroides[i][0], list_centroides[j][0]],
-                [list_centroides[i][1], list_centroides[j][1]],
-                [list_centroides[i][2], list_centroides[j][2]], color='black')
+    list_centroides_sorted = []
+    if (len(res_sorted) > 0): 
+        # Unir los centroides con líneas
+        for i, j in res_sorted:
+            ax.plot([list_centroides[i][0], list_centroides[j][0]],
+                    [list_centroides[i][1], list_centroides[j][1]],
+                    [list_centroides[i][2], list_centroides[j][2]], color='black')
+            # El segundo sera el primero del siguiente
+            list_centroides_sorted.append(list_centroides[i])
+        # el ultimo restante
+        list_centroides_sorted.append(list_centroides[j])
+    else:
+        list_centroides_sorted = list_centroides
+    
+    get_img_shape_meet_prev_sort(list_centroides_sorted)

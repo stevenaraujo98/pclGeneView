@@ -2,7 +2,7 @@ import open3d as o3d
 import numpy as np
 
 print("Testing IO for meshes ...")
-mesh = o3d.io.read_point_cloud("./data/output.ply")
+mesh = o3d.io.read_point_cloud("./data/output (3).ply")
 print(mesh)
 
 # Obtener las coordenadas (x, y, z) de los puntos
@@ -11,7 +11,7 @@ print("Puntos:", points)
 print("Forma de los puntos:", points.shape)
 
 # Filtrar los valores del tercer índice mayores a 4 y menores a 5
-filtered_points = points[(points[:, 2] > 4) & (points[:, 2] < 5)]
+filtered_points = points#[(points[:, 2] > 4) & (points[:, 2] < 5)]
 
 # Obtener las coordenadas filtradas en x, y, z
 filtered_x = filtered_points[:, 0]

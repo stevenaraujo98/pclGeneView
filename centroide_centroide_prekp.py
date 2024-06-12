@@ -58,39 +58,22 @@ def live_plot_3d(left_kpts, right_kpts, baseline, f_px, center):
         indice_color = i % len(lista_colores)
         list_color_to_paint.append(lista_colores[indice_color])
 
-    show_each_point_of_person(left_kpts, right_kpts, baseline, f_px, center, list_color_to_paint, ax, plot_3d, body_3d, list_points_persons)
+    show_each_point_of_person(left_kpts, right_kpts, baseline, f_px, center, list_color_to_paint, ax, plot_3d, list_points_persons)
     show_centroid_and_normal(list_points_persons, list_color_to_paint, ax, list_centroides, plot_3d)
-    get_img_shape_meet(list_centroides)
 
+    if len(list_centroides) > 1:
+        # Ilustrar el centroide de los centroides (centroide del grupo)
+        centroide = calcular_centroide(list_centroides)
+        # plot_3d(centroide[0], centroide[1], centroide[2], ax, "black", s=800, marker='o', label="Cg")
 
-    # Ilustrar el centroide de los centroides (centroide del grupo)
-    centroide = calcular_centroide(list_centroides)
-    plot_3d(centroide[0], centroide[1], centroide[2], ax, "black", s=800, marker='o', label="Cg")
-
-    # Conectar cada uno de los puntos del tronco
+    # Conectar cada uno de los ceintroides
     show_connection_points(list_centroides, ax)
+
+    # get_img_shape_meet(list_centroides)
     
     plt.draw()
     plt.pause(0.0001)
     return list_points_persons
-
-def find_depth_from_disparities(right_points, left_points, baseline, f_pixel):
-    x_right = np.array(right_points)
-    x_left = np.array(left_points)
-    disparity = np.abs(x_left - x_right)
-    z_depth = (baseline * f_pixel) / disparity
-    return np.mean(z_depth)
-
-def body_3d(face_left, face_right, baseline, f_px, center_left):
-    assert len(face_left) == len(face_right)
-
-    z = [find_depth_from_disparities(
-        [x1[0]], [x2[0]], baseline, f_px) for x1, x2 in zip(face_left, face_right)]
-
-    x = (face_left[:, 0] - center_left[0]) * z / f_px
-    y = (face_left[:, 1] - center_left[1]) * z / f_px
-
-    return x, y, z
 
 def point_cloud(left_kpts, right_kpts, baseline, f_px, center):
     return live_plot_3d(left_kpts, right_kpts, baseline, f_px, center)
@@ -165,7 +148,10 @@ path_file_right = './predicts/LightGlue/16_35_42_26_02_2024_VID_RIGHT/16_35_42_2
 """
 
 frame_num = 1
-start_frame = 269 #256
+start_frame = 705 # C #269 # L # 1000 # I #  256
+# Video
+# start_frame = 1000
+
 while(capR.isOpened() and capL.isOpened()):
     if frame_num < start_frame:
         ret,frameL = capL.read()
@@ -191,7 +177,6 @@ while(capR.isOpened() and capL.isOpened()):
 
     # keypointsL_copy = keypointsL.copy()
     # keypointsL_copy[:, :, 0] += 8
-
     key = cv2.waitKey(0)
     if key == ord('q'):
         # Close
